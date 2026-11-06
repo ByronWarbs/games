@@ -1,0 +1,129 @@
+import time, random, math, hashlib, os, json, threading, tkinter as tk
+from tkinter import scrolledtext
+from datetime import datetime
+
+class QuantumDomainNameServer:
+    def __init__(self): self.registry = {}
+    def register_qurl(self, qurl, state_vector, routing_hops, dom_nodes=None): self.registry[qurl] = {"state_vector": state_vector, "hops": routing_hops, "dom_nodes": dom_nodes or [], "registered_at": datetime.now()}
+    def resolve_path(self, qurl):
+        if qurl not in self.registry: raise KeyError(f"qDNS Error: Address {qurl} not resolved.")
+        return self.registry[qurl]
+
+class QuantumKeyDistribution:
+    @staticmethod
+    def execute_bb84_handshake(key_length_bits=32):
+        alice_bits = [random.randint(0, 1) for _ in range(key_length_bits)]
+        alice_bases = [random.choice(['Rectilinear', 'Diagonal']) for _ in range(key_length_bits)]
+        bob_bases = [random.choice(['Rectilinear', 'Diagonal']) for _ in range(key_length_bits)]
+        bob_bits = [alice_bits[i] if alice_bases[i] == bob_bases[i] else random.randint(0, 1) for i in range(key_length_bits)]
+        sifted_key_bob = [bob_bits[i] for i in range(key_length_bits) if alice_bases[i] == bob_bases[i]]
+        return hashlib.sha256("".join(map(str, sifted_key_bob)).encode()).hexdigest()[:16]
+
+class QuantumHypertextNode:
+    def __init__(self, element_id, measurement_basis, amp_0, amp_1, states_text):
+        self.element_id, self.basis, self.alpha, self.beta, self.states_text, self.coherence = element_id, measurement_basis, amp_0, amp_1, states_text, 1.0
+    def observe_and_collapse(self):
+        if self.coherence == 0.0: return "Decohered State Node Error", 0, 0
+        prob_0, prob_1 = math.pow(self.alpha, 2), math.pow(self.beta, 2)
+        collapsed_outcome = random.choices([self.states_text[0], self.states_text[1]], weights=[prob_0, prob_1], k=1)[0]
+        self.coherence = 0.0
+        return collapsed_outcome, prob_0, prob_1
+
+class QuantumTkinterPlatform:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Quantum Networking and QBUILDER Platform")
+        self.root.geometry("850x650")
+        self.root.configure(bg="#2d2d2d")
+        self.qdns = QuantumDomainNameServer()
+        self.storage_dir = "quantum_explorer_files"
+        if not os.path.exists(self.storage_dir): os.makedirs(self.storage_dir)
+        self.default_target = "qhttp://quantum-address/index.qhtml"
+        self.initialize_mock_network_grid()
+        self.create_widgets()
+
+    def initialize_mock_network_grid(self):
+        starter_node = QuantumHypertextNode("main-header", "Hadamard", 0.707, 0.707, ("Hello, world!", "Bonjour, le monde!"))
+        self.qdns.register_qurl(self.default_target, [0.707, 0.0, 0.0, 0.707], ["AliceNode", "RepeaterStation_Alpha", "WebNode_Omega"], [starter_node])
+
+    def create_widgets(self):
+        top_frame = tk.Frame(self.root, padx=10, pady=10, bg="#2d2d2d")
+        top_frame.pack(fill=tk.X)
+        tk.Label(top_frame, text="Target URL:", font=("Arial", 10, "bold"), fg="white", bg="#2d2d2d").pack(side=tk.LEFT, padx=5)
+        self.url_entry = tk.Entry(top_frame, font=("Consolas", 10), width=40, bg="#3d3d3d", fg="white", insertbackground="white")
+        self.url_entry.insert(0, self.default_target)
+        self.url_entry.pack(side=tk.LEFT, padx=5)
+        tk.Button(top_frame, text="Browse Route", command=self.trigger_browse, bg="#4CAF50", fg="white", font=("Arial", 9, "bold"), bd=0, padx=10, pady=2).pack(side=tk.LEFT, padx=5)
+        build_frame = tk.Frame(self.root, padx=10, pady=5, bg="#333333", bd=1, relief=tk.SUNKEN)
+        build_frame.pack(fill=tk.X, padx=10, pady=5)
+        tk.Label(build_frame, text="State 0:", fg="white", bg="#333333", font=("Arial", 9)).grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+        self.ent_s0 = tk.Entry(build_frame, width=20, bg="#444444", fg="white", insertbackground="white")
+        self.ent_s0.insert(0, "Ground State")
+        self.ent_s0.grid(row=0, column=1, padx=5, pady=2)
+        tk.Label(build_frame, text="State 1:", fg="white", bg="#333333", font=("Arial", 9)).grid(row=0, column=2, sticky=tk.W, padx=5, pady=2)
+        self.ent_s1 = tk.Entry(build_frame, width=20, bg="#444444", fg="white", insertbackground="white")
+        self.ent_s1.insert(0, "Excited State")
+        self.ent_s1.grid(row=0, column=3, padx=5, pady=2)
+        tk.Button(build_frame, text="Compile Page", command=self.trigger_builder, bg="#9c27b0", fg="white", font=("Arial", 9, "bold"), bd=0, padx=15, pady=2).grid(row=0, column=4, padx=15, pady=2)
+        log_frame = tk.Frame(self.root, padx=10, pady=5, bg="#2d2d2d")
+        log_frame.pack(fill=tk.BOTH, expand=True)
+        self.console_output = scrolledtext.ScrolledText(log_frame, wrap=tk.WORD, font=("Consolas", 10), bg="#1e1e1e", fg="#ffffff")
+        self.console_output.pack(fill=tk.BOTH, expand=True)
+        self.append_log("--- QUANTUM PLATFORM REPL ONLINE ---")
+
+    def append_log(self, msg):
+        formatted_message = f"[{datetime.now().strftime('%H:%M:%S.%f')[:-3]}] {msg}\n"
+        self.root.after(0, lambda: self._safe_append(formatted_message))
+
+    def _safe_append(self, text):
+        self.console_output.insert(tk.END, text)
+        self.console_output.see(tk.END)
+
+    def trigger_browse(self): threading.Thread(target=self.execute_browser_runtime).start()
+
+    def execute_browser_runtime(self):
+        target_qurl = self.url_entry.get().strip()
+        self.append_log("================================================================================")
+        self.append_log(f"Querying qDNS registry context for lookup path: {target_qurl}")
+        time.sleep(0.2)
+        try:
+            route_data = self.qdns.resolve_path(target_qurl)
+        except KeyError as e:
+            self.append_log(str(e)); return
+        self.append_log(f"Network paths isolated: {route_data['hops']}")
+        time.sleep(0.2)
+        self.append_log(f"Handshake token established: {QuantumKeyDistribution.execute_bb84_handshake()}")
+        for node in route_data["dom_nodes"]:
+            self.append_log(f"Element parsed: <qh1 id='{node.element_id}'> flagged as superposition.")
+            collapsed_text, p0, p1 = node.observe_and_collapse()
+            self.append_log(f"Wavefunction collapsed successfully using basis: {node.basis}")
+            self.append_log(f" RENDERED OUTPUT -> ['{collapsed_text}'] (Probabilities -> |0>: {p0:.2%}, |1>: {p1:.2%})")
+        self.append_log("================================================================================\n")
+
+    def trigger_builder(self): threading.Thread(target=self.execute_qbuilder_pipeline, args=(self.ent_s0.get().strip(), self.ent_s1.get().strip())).start()
+
+    def execute_qbuilder_pipeline(self, state_0_text, state_1_text):
+        self.append_log("================================================================================")
+        self.append_log("  INITIALIZING DISTRIBUTED ANONYMOUS QBUILDER PIPELINE")
+        angle = random.uniform(0, math.pi / 2)
+        amp_0, amp_1 = math.cos(angle), math.sin(angle)
+        generated_filename = f"qnode_{hashlib.md5(str(random.random()).encode()).hexdigest()[:8]}.qhtml"
+        custom_node = QuantumHypertextNode("anonymous-header", "Hadamard", amp_0, amp_1, (state_0_text, state_1_text))
+        generated_qurl = f"qhttp://quantum-address/{generated_filename}"
+        self.qdns.register_qurl(generated_qurl, [amp_0, 0.0, 0.0, amp_1], ["DarkNode_Hidden", "ProxyRepeater_Echo"], [custom_node])
+        file_payload = {"metadata": {"generated_qurl": generated_qurl, "timestamp": datetime.now().isoformat()}, "quantum_dom": {"element_id": "anonymous-header", "measurement_basis": "Hadamard", "amplitudes": {"alpha": amp_0, "beta": amp_1}, "states_text": [state_0_text, state_1_text]}}
+        file_path = os.path.join(self.storage_dir, generated_filename)
+        with open(file_path, "w", encoding="utf-8") as f: json.dump(file_payload, f, indent=4)
+        self.append_log("[DEPLOYMENT SUCCESSFUL]")
+        self.append_log(f"Pointer Locked: {generated_qurl}")
+        self.append_log(f"File Saved to Disk: {os.path.abspath(file_path)}")
+        self.append_log("================================================================================\n")
+        self.root.after(0, lambda: self.url_entry.delete(0, tk.END))
+        self.root.after(0, lambda: self.url_entry.insert(0, generated_qurl))
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = QuantumTkinterPlatform(root)
+    root.mainloop()
+
+
